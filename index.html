@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA AI Assistant</title>
+    <!-- Modern Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg-color: #F3F4F6;
+            --chat-bg: #FFFFFF;
+            --user-msg: #4F46E5;
+            --bot-msg: #F9FAFB;
+            --text-main: #1F2937;
+            --text-light: #6B7280;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: var(--text-main);
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 480px;
+            height: 85vh;
+            background: var(--chat-bg);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary), #7C3AED);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .new-chat-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 6px 12px;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .new-chat-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8fafc;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        .chat-box::-webkit-scrollbar { width: 6px; }
+        .chat-box::-webkit-scrollbar-track { background: transparent; }
+        .chat-box::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 85%;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            animation: fadeIn 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+            word-wrap: break-word;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background: var(--user-msg);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+        }
+
+        .bot-message {
+            background: var(--bot-msg);
+            color: var(--text-main);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .input-area {
+            display: flex;
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #E5E7EB;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: 25px;
+            border: 1px solid #D1D5DB;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #F9FAFB;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .send-btn {
+            background: var(--primary);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        .send-btn:disabled {
+            background: #9CA3AF;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .send-btn svg {
+            fill: white;
+            width: 20px;
+            height: 20px;
+            margin-left: 2px; /* optical alignment */
+        }
+
+        /* Modern Code Block */
+        pre {
+            background: #1E1E1E;
+            color: #D4D4D4;
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+        }
+        
+        code {
+            font-family: inherit;
+        }
+
+        /* Animated Typing Dots */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 4px 8px;
+            align-items: center;
+            height: 24px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-light);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="chat-container">
+
+    <div class="chat-header">
+        <span>🚀 DSA Assistant</span>
+        <button class="new-chat-btn" onclick="newChat()">+ New</button>
+    </div>
+
+    <div class="chat-box" id="chat-box">
+        <div class="message bot-message">
+            Hi! Ask me a DSA question (e.g., Two Sum, BFS). I’ll guide you step by step. 💡
+        </div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="user-input"
+               placeholder="Type your question..."
+               onkeypress="handleEnter(event)" autocomplete="off">
+        <button id="send-btn" class="send-btn" onclick="sendMessage()">
+            <!-- Send Icon SVG -->
+            <svg viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+            </svg>
+        </button>
+    </div>
+
+</div>
+
+<script>
+
+    const sessionId = localStorage.getItem("session_id") || crypto.randomUUID();
+    localStorage.setItem("session_id", sessionId);
+
+    async function sendMessage() {
+        const inputField = document.getElementById("user-input");
+        const chatBox = document.getElementById("chat-box");
+        const sendBtn = document.getElementById("send-btn");
+
+        const message = inputField.value.trim();
+        if (!message) return;
+
+        // Show user message
+        chatBox.innerHTML += `<div class="message user-message">${message}</div>`;
+        inputField.value = "";
+
+        // Scroll
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Disable button & input temporarily
+        sendBtn.disabled = true;
+        inputField.disabled = true;
+
+        // Typing indicator animation
+        const typingId = "typing-" + Date.now();
+        chatBox.innerHTML += `
+            <div id="${typingId}" class="message bot-message">
+                <div class="typing-indicator">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
+            </div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const response = await fetch("http://127.0.0.1:8000/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    prompt: message,
+                    session_id: sessionId
+                })
+            });
+
+            const data = await response.json();
+
+            // Remove typing indicator
+            document.getElementById(typingId).remove();
+
+            // Format response (Improved Regex to handle different code blocks like ```java, ```cpp)
+            let reply = data.reply
+                .replace(/\n/g, "<br>")
+                .replace(/```[a-zA-Z]*\n/g, "<pre><code>") // Catches ```python, ```java, etc.
+                .replace(/```/g, "</code></pre>");
+
+            // Show AI message
+            chatBox.innerHTML += `<div class="message bot-message">${reply}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (error) {
+            document.getElementById(typingId).remove();
+            chatBox.innerHTML += `<div class="message bot-message" style="color: red;">Error connecting to server. Is your backend running?</div>`;
+        }
+
+        // Re-enable input and button
+        sendBtn.disabled = false;
+        inputField.disabled = false;
+        inputField.focus(); // Auto-focus back on input
+    }
+
+    function handleEnter(event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    }
+
+    function newChat() {
+        localStorage.removeItem("session_id");
+        // Optional fade-out effect before reload
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => location.reload(), 300);
+    }
+
+</script>
+</body>
+</html>
